@@ -7,3 +7,7 @@ export PATH=$RUST_INSTALL_LOC/cargo/bin:$RUST_INSTALL_LOC/rustc/bin:$PATH
 export CARGO_HOME=$PWD/.cargo
 export RUSTUP_HOME=$PWD/.rustup
 
+# Vendored dependencies for offline builds
+export PISTON_RUST_VENDOR=$PWD/vendor
+export PISTON_RUST_LOCK=$PWD/Cargo.lock
+

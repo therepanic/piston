@@ -2,7 +2,9 @@
 set -euo pipefail
 
 mv "$1" "$1.java"
-main_class="$1"
+base="$(basename "$1")"
+
+main_class="${base%%.*}"
 shift || true
 
 # LeetCode-like: enable preview features and compile for release 25

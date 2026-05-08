@@ -9,7 +9,7 @@ source ./environment
 
 mkdir -p "$CARGO_HOME" "$RUSTUP_HOME"
 
-# Pre-warm crates.io for common DS libs (LeetCode-like).
+# Pre-vendor crates.io deps for offline compilation inside nsjail (no network).
 precache_dir="$PWD/.piston-precache"
 rm -rf "$precache_dir"
 mkdir -p "$precache_dir/src"
@@ -30,6 +30,25 @@ cat > "$precache_dir/src/main.rs" <<'EOF'
 fn main() {}
 EOF
 
-(cd "$precache_dir" && cargo fetch)
+(cd "$precache_dir" && cargo generate-lockfile)
+
+# Copy lockfile + vendor sources into the package.
+cp "$precache_dir/Cargo.lock" "$PISTON_RUST_LOCK"
+rm -rf "$PISTON_RUST_VENDOR"
+mkdir -p "$PISTON_RUST_VENDOR"
+(cd "$precache_dir" && cargo vendor "$PISTON_RUST_VENDOR" >/dev/null)
+
+# Ensure cargo never tries to hit the network at runtime.
+mkdir -p "$CARGO_HOME"
+cat > "$CARGO_HOME/config.toml" <<EOF
+[net]
+offline = true
+
+[source.crates-io]
+replace-with = "vendored-sources"
+
+[source.vendored-sources]
+directory = "$PISTON_RUST_VENDOR"
+EOF
 rm -rf "$precache_dir"
 

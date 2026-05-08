@@ -3,6 +3,7 @@ set -euo pipefail
 
 # Compile via Cargo so external crates work out of the box.
 mkdir -p .piston-rust/src
+mkdir -p .piston-rust/.cargo
 
 mv "$1" "$1.rs"
 main_file="$1.rs"
@@ -25,7 +26,31 @@ regex = "1"
 itertools = "0.14"
 EOF
 
-(cd .piston-rust && cargo build --release)
+# Force offline build using the vendored sources shipped in the package.
+cat > .piston-rust/.cargo/config.toml <<'EOF'
+[net]
+offline = true
+
+[source.crates-io]
+replace-with = "vendored-sources"
+
+[source.vendored-sources]
+directory = "__VENDOR_DIR__"
+EOF
+
+if [ -n "${PISTON_RUST_VENDOR:-}" ]; then
+  sed -i "s|__VENDOR_DIR__|${PISTON_RUST_VENDOR}|g" .piston-rust/.cargo/config.toml
+else
+  echo "PISTON_RUST_VENDOR is not set" >&2
+  exit 1
+fi
+
+# Use the lockfile we generated during package build to pin exact versions.
+if [ -f "${PISTON_RUST_LOCK:-}" ]; then
+  cp "${PISTON_RUST_LOCK}" .piston-rust/Cargo.lock
+fi
+
+(cd .piston-rust && cargo build --release --offline)
 cp .piston-rust/target/release/code ./binary
 chmod +x ./binary
 
