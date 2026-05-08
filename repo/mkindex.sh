@@ -1,4 +1,4 @@
-BASEURL=http://repo:8000/
+BASEURL="https://github.com/therepanic/piston/releases/download/pkgs/"
 
 i=0
 
