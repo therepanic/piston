@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+export PATH=$PWD/usr/bin:$PATH
+
+# Keep SwiftPM caches inside the package so dependencies can be prewarmed.
+export HOME=$PWD/home
+export XDG_CACHE_HOME=$HOME/.cache
+

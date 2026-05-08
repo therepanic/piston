@@ -21,3 +21,4 @@ bin/pip2 install -U pip==20.3.*
 # Upgrade pip to latest supported version
 
 bin/pip2 install numpy scipy pycrypto whoosh bcrypt passlib
+bin/pip2 install sortedcontainers

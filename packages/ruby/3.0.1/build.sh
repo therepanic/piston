@@ -19,3 +19,5 @@ make install -j$(nproc)
 cd ..
 rm -rf build 
 
+bin/gem install algorithms
+

@@ -2,3 +2,5 @@
 
 # Put 'export' statements here for environment variables
 export PATH=$PWD/bin:$PATH
+# Allow `require('lodash')` and `require('@datastructures-js/...')` without local installs
+export NODE_PATH=$PWD/lib/node_modules

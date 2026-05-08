@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+rename 's/$/\.ts/' "$@" # Add .ts extension
+
+tsc *.ts --alwaysStrict --strictBindCallApply --strictFunctionTypes --target ES2024
+

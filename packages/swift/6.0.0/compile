@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Build via SwiftPM to enable package imports out of the box.
+mkdir -p .piston-swift/Sources/code
+
+mv "$1" "$1.swift"
+main_file="$1.swift"
+shift || true
+
+cp "$main_file" .piston-swift/Sources/code/main.swift
+
+cat > .piston-swift/Package.swift <<'EOF'
+// swift-tools-version: 6.0
+import PackageDescription
+
+let package = Package(
+    name: "code",
+    dependencies: [
+        .package(url: "https://github.com/apple/swift-algorithms.git", exact: "1.2.0"),
+        .package(url: "https://github.com/apple/swift-collections.git", exact: "1.1.4"),
+        .package(url: "https://github.com/apple/swift-numerics.git", exact: "1.0.2"),
+    ],
+    targets: [
+        .executableTarget(
+            name: "code",
+            dependencies: [
+                .product(name: "Algorithms", package: "swift-algorithms"),
+                .product(name: "Collections", package: "swift-collections"),
+                .product(name: "Numerics", package: "swift-numerics"),
+            ]
+        ),
+    ]
+)
+EOF
+
+(cd .piston-swift && swift build -c release)
+cp .piston-swift/.build/release/code ./binary
+chmod +x ./binary
+

@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Compile via Cargo so external crates work out of the box.
+mkdir -p .piston-rust/src
+
+mv "$1" "$1.rs"
+main_file="$1.rs"
+shift || true
+
+cp "$main_file" .piston-rust/src/main.rs
+
+cat > .piston-rust/Cargo.toml <<'EOF'
+[package]
+name = "code"
+version = "0.1.0"
+edition = "2024"
+
+[profile.release]
+opt-level = 2
+
+[dependencies]
+rand = "0.8"
+regex = "1"
+itertools = "0.14"
+EOF
+
+(cd .piston-rust && cargo build --release)
+cp .piston-rust/target/release/code ./binary
+chmod +x ./binary
+

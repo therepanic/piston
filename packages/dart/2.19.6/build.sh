@@ -9,3 +9,8 @@ cp -r dart-sdk/* .
 rm -rf dart-sdk
 
 chmod -R +rx bin
+
+export PATH="$PWD/bin:$PATH"
+export PUB_CACHE="$PWD/.pub-cache"
+mkdir -p "$PUB_CACHE"
+dart pub cache add collection --version 1.18.0 || true

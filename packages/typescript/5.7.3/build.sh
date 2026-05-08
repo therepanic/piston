@@ -1,13 +1,11 @@
 #!/usr/bin/env bash
 
-source ../../node/18.15.0/build.sh
-
+source ../../node/22.14.0/build.sh
 source ./environment
 
-# Ensure global installs stay inside this package directory
 bin/npm config set prefix "$PWD"
 
-bin/npm install -g typescript@5.0.3 lodash@4.17.21 \
+bin/npm install -g typescript@5.7.3 lodash@4.17.21 \
   @datastructures-js/binary-search-tree@5.4.0 \
   @datastructures-js/deque@1.0.8 \
   @datastructures-js/graph@5.3.1 \
@@ -18,3 +16,4 @@ bin/npm install -g typescript@5.0.3 lodash@4.17.21 \
   @datastructures-js/set@4.2.2 \
   @datastructures-js/stack@3.1.6 \
   @datastructures-js/trie@4.2.3
+

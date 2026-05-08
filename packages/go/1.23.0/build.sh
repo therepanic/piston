@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+curl -LO https://go.dev/dl/go1.23.0.linux-amd64.tar.gz
+tar -xzf go1.23.0.linux-amd64.tar.gz
+rm go1.23.0.linux-amd64.tar.gz
+
+export PATH="$PWD/go/bin:$PATH"
+export GOPATH="$PWD/gopath"
+export GOMODCACHE="$GOPATH/pkg/mod"
+export GOCACHE="$PWD/gocache"
+export GO111MODULE=on
+
+mkdir -p "$GOMODCACHE" "$GOCACHE"
+
+precache_dir="$PWD/.piston-precache"
+rm -rf "$precache_dir"
+mkdir -p "$precache_dir"
+
+cat > "$precache_dir/go.mod" <<'EOF'
+module piston-precache
+
+go 1.23
+
+require (
+    github.com/emirpasic/gods v1.18.1
+    github.com/emirpasic/gods/v2 v2.0.0-alpha
+)
+EOF
+
+(
+  cd "$precache_dir"
+  go mod download
+)
+
+rm -rf "$precache_dir"
