@@ -1,4 +1,26 @@
 #!/usr/bin/env bash
 
-# Put instructions to run the runtime
-dart run "$@"
+set -euo pipefail
+
+code_file="$1"
+shift || true
+
+workdir=".piston-dart"
+rm -rf "$workdir"
+mkdir -p "$workdir/bin"
+
+cp "$code_file" "$workdir/bin/main.dart"
+
+cat > "$workdir/pubspec.yaml" <<'EOF'
+name: piston_runtime
+environment:
+  sdk: ">=2.19.0 <3.0.0"
+dependencies:
+  collection: 1.18.0
+EOF
+
+(
+  cd "$workdir"
+  dart pub get --offline
+  dart run bin/main.dart "$@"
+)

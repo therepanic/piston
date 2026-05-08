@@ -5,6 +5,11 @@ curl -OL "https://static.rust-lang.org/dist/rust-1.88.0-x86_64-unknown-linux-gnu
 tar xzf rust-1.88.0-x86_64-unknown-linux-gnu.tar.gz
 rm rust-1.88.0-x86_64-unknown-linux-gnu.tar.gz
 
+install_dir="$PWD/rust"
+rm -rf "$install_dir"
+./rust-1.88.0-x86_64-unknown-linux-gnu/install.sh --prefix="$install_dir" --without=rust-docs
+rm -rf ./rust-1.88.0-x86_64-unknown-linux-gnu
+
 source ./environment
 
 mkdir -p "$CARGO_HOME" "$RUSTUP_HOME"

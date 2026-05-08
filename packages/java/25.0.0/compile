@@ -1,14 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-mv "$1" "$1.java"
-base="$(basename "$1")"
-
-main_class="${base%%.*}"
-shift || true
-
-# LeetCode-like: enable preview features and compile for release 25
-javac --enable-preview --release 25 "$main_class.java"
-
-echo "$main_class" > .piston_main_class
+# Java 25 source-file mode: avoid classname/file rename edge-cases.
+# Actual execution happens in run script with `java --source 25`.
+exit 0
 

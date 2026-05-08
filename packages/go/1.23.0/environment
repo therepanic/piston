@@ -2,3 +2,5 @@ export PATH=$PWD/go/bin:$PATH
 export GOPATH=$PWD/gopath
 export GOMODCACHE=$GOPATH/pkg/mod
 export GO111MODULE=on
+export GOFLAGS=-p=1
+export GOMAXPROCS=1

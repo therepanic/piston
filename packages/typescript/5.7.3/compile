@@ -2,5 +2,8 @@
 
 rename 's/$/\.ts/' "$@" # Add .ts extension
 
-tsc *.ts --alwaysStrict --strictBindCallApply --strictFunctionTypes --target ES2024
+# Make globally installed packages visible to the compiler.
+ln -sfn "$PWD/lib/node_modules" node_modules
+
+tsc *.ts --alwaysStrict --strictBindCallApply --strictFunctionTypes --target ES2024 --moduleResolution node
 
