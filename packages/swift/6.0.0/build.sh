@@ -5,7 +5,7 @@ set -euo pipefail
 : "${SWIFT_TARBALL_URL:=https://download.swift.org/swift-6.0-release/ubuntu2204/swift-6.0-RELEASE/swift-6.0-RELEASE-ubuntu22.04.tar.gz}"
 
 curl -L "$SWIFT_TARBALL_URL" -o swift.tar.gz
-tar xzf swift.tar.gz
+tar xzf swift.tar.gz --strip-components=1
 rm swift.tar.gz
 
 source ./environment
