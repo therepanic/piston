@@ -10,6 +10,8 @@ export GOPATH="$PWD/gopath"
 export GOMODCACHE="$GOPATH/pkg/mod"
 export GOCACHE="$PWD/gocache"
 export GO111MODULE=on
+# Avoid Go 1.23 auto-downloading toolchains into module cache
+export GOTOOLCHAIN=local
 
 mkdir -p "$GOMODCACHE" "$GOCACHE"
 
@@ -34,3 +36,7 @@ EOF
 )
 
 rm -rf "$precache_dir"
+
+# Remove download cache to prevent tar "file changed as we read it" errors.
+# Keep extracted modules in $GOMODCACHE (e.g. github.com/emirpasic/gods*).
+rm -rf "$GOMODCACHE/cache/download" "$GOMODCACHE/cache/vcs"
