@@ -11,7 +11,7 @@ curl -L "https://cache.ruby-lang.org/pub/ruby/3.2/ruby-3.2.6.tar.gz" -o ruby.tar
 tar xzf ruby.tar.gz --strip-components=1
 rm ruby.tar.gz
 
-./configure --prefix "$PREFIX"
+./configure --prefix "$PREFIX" --disable-install-doc
 make -j"$(nproc)"
 make install -j"$(nproc)"
 
