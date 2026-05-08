@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+main_class="$(cat .piston_main_class 2>/dev/null || true)"
+if [ -z "${main_class}" ]; then
+  main_class="$1"
+fi
+
+shift || true
+
+java --enable-preview "$main_class" "$@"
+
