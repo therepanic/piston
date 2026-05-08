@@ -1,0 +1,4 @@
+require "algorithms"
+
+puts "ok"
+
