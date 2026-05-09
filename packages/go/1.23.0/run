@@ -6,10 +6,9 @@ mv "$1" "$1.go"
 filename="$1.go"
 shift
 
-# LeetCode-like: vendored mods are in GOMODCACHE; go.sum is required for -mod=readonly.
-if [ ! -f go.sum ]; then
-  cp "$pkg_root/go.piston.mod" go.mod
-  cp "$pkg_root/go.piston.sum" go.sum
-fi
+# Always use packaged go.mod/go.sum — submission dir may reuse a stale/partial go.sum
+# left from older runs ("missing go.sum entry" otherwise).
+cp "$pkg_root/go.piston.mod" go.mod
+cp "$pkg_root/go.piston.sum" go.sum
 
 GOCACHE=$PWD GOPROXY=off GOSUMDB=off go run -mod=readonly "$filename" "$@"

@@ -33,6 +33,7 @@ EOF
 (
   cd "$precache_dir"
   go mod download
+  go mod tidy
 )
 
 # Ship go.mod + go.sum for run-time (submission has no network; go needs checksums).
