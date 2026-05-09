@@ -4,3 +4,5 @@ export GOMODCACHE=$GOPATH/pkg/mod
 export GO111MODULE=on
 export GOFLAGS=-p=1
 export GOMAXPROCS=1
+# Frozen to this package dir in .env (used by run script to copy go.mod/go.sum).
+export PISTON_GO_PKG_ROOT=$PWD

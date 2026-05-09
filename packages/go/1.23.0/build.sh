@@ -35,6 +35,10 @@ EOF
   go mod download
 )
 
+# Ship go.mod + go.sum for run-time (submission has no network; go needs checksums).
+cp "$precache_dir/go.mod" ./go.piston.mod
+cp "$precache_dir/go.sum" ./go.piston.sum
+
 rm -rf "$precache_dir"
 
 # Remove download cache to prevent tar "file changed as we read it" errors.

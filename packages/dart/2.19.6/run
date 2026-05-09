@@ -2,6 +2,10 @@
 
 set -euo pipefail
 
+pkg="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export PATH="$pkg/bin:${PATH:-}"
+export PUB_CACHE="${PUB_CACHE:-$pkg/.pub-cache}"
+
 code_file="$1"
 shift || true
 

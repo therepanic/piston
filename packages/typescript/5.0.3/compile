@@ -1,7 +1,25 @@
 #!/usr/bin/env bash
 
-# Put instructions to compile source code, remove this file if the language does not require this stage
+pkg="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 rename 's/$/\.ts/' "$@" # Add .ts extension
 
-tsc *.ts --alwaysStrict --strictBindCallApply --strictFunctionTypes --target ES2024
+ln -sfn "$pkg/lib/node_modules" ./node_modules
+
+cat > tsconfig.piston.json <<EOF
+{
+  "compilerOptions": {
+    "alwaysStrict": true,
+    "strictBindCallApply": true,
+    "strictFunctionTypes": true,
+    "target": "ES2024",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "baseUrl": "$pkg/lib/node_modules",
+    "typeRoots": ["$pkg/lib/node_modules/@types"]
+  },
+  "include": ["*.ts"]
+}
+EOF
+
+tsc -p tsconfig.piston.json

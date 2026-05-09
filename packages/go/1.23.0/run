@@ -1,21 +1,15 @@
 #!/usr/bin/env bash
 
-mv $1 $1.go
+pkg_root="${PISTON_GO_PKG_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}"
+
+mv "$1" "$1.go"
 filename="$1.go"
 shift
 
-# LeetCode-like convenience: allow gods imports without user-provided go.mod.
-if [ ! -f go.mod ]; then
-cat > go.mod <<'EOF'
-module code
-
-go 1.23
-
-require (
-    github.com/emirpasic/gods v1.18.1
-    github.com/emirpasic/gods/v2 v2.0.0-alpha
-)
-EOF
+# LeetCode-like: vendored mods are in GOMODCACHE; go.sum is required for -mod=readonly.
+if [ ! -f go.sum ]; then
+  cp "$pkg_root/go.piston.mod" go.mod
+  cp "$pkg_root/go.piston.sum" go.sum
 fi
 
-GOCACHE=$PWD GOPROXY=off GOSUMDB=off go run "$filename" "$@"
+GOCACHE=$PWD GOPROXY=off GOSUMDB=off go run -mod=readonly "$filename" "$@"
