@@ -95,8 +95,9 @@ EOF
 
 (
   cd "$precache_dir"
-  # Same remaps as compile script so fingerprints stay valid when target is copied into isolate.
-  export RUSTFLAGS="--remap-path-prefix=$(pwd)=/piston-rust-src --remap-path-prefix=${PISTON_RUST_VENDOR}=/piston-rust-vendor"
+  export CARGO_TARGET_DIR="$precache_dir/target"
+  # Remap src, vendor, and target dir to fixed logical paths (must match compile script).
+  export RUSTFLAGS="--remap-path-prefix=$(pwd)=/piston-rust-src --remap-path-prefix=${PISTON_RUST_VENDOR}=/piston-rust-vendor --remap-path-prefix=${CARGO_TARGET_DIR}=/piston-rust-tgt"
   cargo generate-lockfile --offline
   cargo build --release --offline
 )

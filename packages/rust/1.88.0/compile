@@ -57,9 +57,12 @@ if [ -n "${PISTON_RUST_PREBUILT_RELEASE:-}" ] && [ -d "$PISTON_RUST_PREBUILT_REL
   cp -a "${PISTON_RUST_PREBUILT_RELEASE}/." "$CARGO_TARGET_DIR/release/"
 fi
 
-export RUSTFLAGS="--remap-path-prefix=$(cd .piston-rust && pwd)=/piston-rust-src --remap-path-prefix=${PISTON_RUST_VENDOR}=/piston-rust-vendor"
+export RUSTFLAGS="--remap-path-prefix=$(cd .piston-rust && pwd)=/piston-rust-src --remap-path-prefix=${PISTON_RUST_VENDOR}=/piston-rust-vendor --remap-path-prefix=${CARGO_TARGET_DIR}=/piston-rust-tgt"
 
-(cd .piston-rust && cargo build --release --offline -j 1)
+# Parallel rustc jobs (wall clock); raise rust max_process_count in PISTON_LIMIT_OVERRIDES if needed.
+j="$(nproc 2>/dev/null || echo 4)"
+if [ "$j" -gt 8 ]; then j=8; fi
+(cd .piston-rust && cargo build --release --offline -j "$j")
 cp "${CARGO_TARGET_DIR}/release/code" ./binary
 chmod +x ./binary
 
