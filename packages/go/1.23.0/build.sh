@@ -30,11 +30,21 @@ require (
 )
 EOF
 
+# go mod vendor only includes modules reachable from .go files in this module.
+cat > "$precache_dir/stub_imports.go" <<'EOF'
+package main
+
+import (
+	_ "github.com/emirpasic/gods/sets/hashset"
+	_ "github.com/emirpasic/gods/v2/lists/arraylist"
+)
+
+func main() {}
+EOF
+
 (
   cd "$precache_dir"
-  go mod download
   go mod tidy
-  # Vendored tree: works with -mod=vendor in nsjail (no GOMODCACHE / no network).
   go mod vendor
 )
 
