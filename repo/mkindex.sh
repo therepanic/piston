@@ -1,4 +1,4 @@
-BASEURL="https://github.com/therepanic/piston/releases/download/pkgs/"
+BASEURL="https://github.com/therepanic/openleetcode/releases/download/pkgs/"
 
 i=0
 
