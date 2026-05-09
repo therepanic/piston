@@ -10,6 +10,6 @@ export RUSTUP_HOME=$PWD/.rustup
 # Vendored dependencies for offline builds
 export PISTON_RUST_VENDOR=$PWD/vendor
 export PISTON_RUST_LOCK=$PWD/Cargo.lock
-# Pre-built release deps (libc, regex, …) copied into submission target to skip cold compile
-export PISTON_RUST_PREBUILT=$PWD/rust-prebuilt-deps
+# Full `target/release` from package-time prebuild (deps + .fingerprint + …), copied into sandbox target
+export PISTON_RUST_PREBUILT_RELEASE=$PWD/rust-prebuilt-release
 

@@ -95,6 +95,8 @@ EOF
 
 (
   cd "$precache_dir"
+  # Same remaps as compile script so fingerprints stay valid when target is copied into isolate.
+  export RUSTFLAGS="--remap-path-prefix=$(pwd)=/piston-rust-src --remap-path-prefix=${PISTON_RUST_VENDOR}=/piston-rust-vendor"
   cargo generate-lockfile --offline
   cargo build --release --offline
 )
@@ -102,9 +104,9 @@ EOF
 # Keep runtime compile using the same lockfile as prebuild (same dependency graph).
 cp "$precache_dir/Cargo.lock" "$PISTON_RUST_LOCK"
 
-rm -rf "$PISTON_RUST_PREBUILT"
-mkdir -p "$PISTON_RUST_PREBUILT"
-cp -a "$precache_dir/target/release/deps/." "$PISTON_RUST_PREBUILT/"
+rm -rf "$PISTON_RUST_PREBUILT_RELEASE"
+mkdir -p "$PISTON_RUST_PREBUILT_RELEASE"
+cp -a "$precache_dir/target/release/." "$PISTON_RUST_PREBUILT_RELEASE/"
 
 rm -rf "$precache_dir"
 
