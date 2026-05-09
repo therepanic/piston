@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Compile via Cargo so external crates work out of the box.
+# Fast path: link user code with pre-built dependency rlibs from package build (no cargo in isolate).
 mkdir -p .piston-rust/src
-mkdir -p .piston-rust/.cargo
 
 mv "$1" "$1.rs"
 main_file="$1.rs"
@@ -11,58 +10,39 @@ shift || true
 
 cp "$main_file" .piston-rust/src/main.rs
 
-cat > .piston-rust/Cargo.toml <<'EOF'
-[package]
-name = "code"
-version = "0.1.0"
-edition = "2024"
-
-[profile.release]
-opt-level = 2
-
-[dependencies]
-rand = "0.8"
-regex = "1"
-itertools = "0.14"
-EOF
-
-# Force offline build using the vendored sources shipped in the package.
-cat > .piston-rust/.cargo/config.toml <<'EOF'
-[net]
-offline = true
-
-[source.crates-io]
-replace-with = "vendored-sources"
-
-[source.vendored-sources]
-directory = "__VENDOR_DIR__"
-EOF
-
-if [ -n "${PISTON_RUST_VENDOR:-}" ]; then
-  sed -i "s|__VENDOR_DIR__|${PISTON_RUST_VENDOR}|g" .piston-rust/.cargo/config.toml
-else
-  echo "PISTON_RUST_VENDOR is not set" >&2
+if [ -z "${PISTON_RUST_PREBUILT_RELEASE:-}" ]; then
+  echo "PISTON_RUST_PREBUILT_RELEASE is not set" >&2
   exit 1
 fi
 
-# Use the lockfile we generated during package build to pin exact versions.
-if [ -f "${PISTON_RUST_LOCK:-}" ]; then
-  cp "${PISTON_RUST_LOCK}" .piston-rust/Cargo.lock
+DEPS="${PISTON_RUST_PREBUILT_RELEASE}/deps"
+if [ ! -d "$DEPS" ]; then
+  echo "missing prebuilt deps: $DEPS (rebuild rust-1.88.0.pkg.tar.gz)" >&2
+  exit 1
 fi
 
-# Writable output dir inside submission (package mount is read-only in isolate).
-export CARGO_TARGET_DIR="$PWD/.piston-rust-target"
-mkdir -p "$CARGO_TARGET_DIR/release"
-if [ -n "${PISTON_RUST_PREBUILT_RELEASE:-}" ] && [ -d "$PISTON_RUST_PREBUILT_RELEASE" ] && [ -n "$(ls -A "$PISTON_RUST_PREBUILT_RELEASE" 2>/dev/null)" ]; then
-  cp -a "${PISTON_RUST_PREBUILT_RELEASE}/." "$CARGO_TARGET_DIR/release/"
-fi
+pick_rlib() {
+  local -a c
+  shopt -s nullglob
+  c=( "$DEPS"/"$1"-*.rlib )
+  shopt -u nullglob
+  if [ "${#c[@]}" -eq 0 ]; then
+    echo "no rlib matching $1 in $DEPS" >&2
+    exit 1
+  fi
+  echo "${c[0]}"
+}
 
-export RUSTFLAGS="--remap-path-prefix=$(cd .piston-rust && pwd)=/piston-rust-src --remap-path-prefix=${PISTON_RUST_VENDOR}=/piston-rust-vendor --remap-path-prefix=${CARGO_TARGET_DIR}=/piston-rust-tgt"
+# Direct deps of the LeetCode-style stub; transitive rlibs resolve via -L.
+RAND="$(pick_rlib librand)"
+REGEX="$(pick_rlib libregex)"
+ITERTOOLS="$(pick_rlib libitertools)"
 
-# Parallel rustc jobs (wall clock); raise rust max_process_count in PISTON_LIMIT_OVERRIDES if needed.
-j="$(nproc 2>/dev/null || echo 4)"
-if [ "$j" -gt 8 ]; then j=8; fi
-(cd .piston-rust && cargo build --release --offline -j "$j")
-cp "${CARGO_TARGET_DIR}/release/code" ./binary
+rustc --edition 2024 -C opt-level=2 \
+  -L "$DEPS" \
+  --extern "rand=${RAND}" \
+  --extern "regex=${REGEX}" \
+  --extern "itertools=${ITERTOOLS}" \
+  .piston-rust/src/main.rs -o ./binary
+
 chmod +x ./binary
-
