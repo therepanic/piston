@@ -5,5 +5,23 @@ rename 's/$/\.ts/' "$@" # Add .ts extension
 # Make globally installed packages visible to the compiler.
 ln -sfn "$PWD/lib/node_modules" node_modules
 
-tsc *.ts --alwaysStrict --strictBindCallApply --strictFunctionTypes --target ES2024 --moduleResolution node
+cat > tsconfig.piston.json <<EOF
+{
+  "compilerOptions": {
+    "alwaysStrict": true,
+    "strictBindCallApply": true,
+    "strictFunctionTypes": true,
+    "target": "ES2024",
+    "moduleResolution": "node",
+    "baseUrl": ".",
+    "paths": {
+      "@datastructures-js/*": ["$PWD/lib/node_modules/@datastructures-js/*"],
+      "lodash": ["$PWD/lib/node_modules/lodash"]
+    }
+  },
+  "include": ["*.ts"]
+}
+EOF
+
+tsc -p tsconfig.piston.json
 

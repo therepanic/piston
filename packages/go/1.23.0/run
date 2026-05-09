@@ -1,7 +1,21 @@
 #!/usr/bin/env bash
 
 mv $1 $1.go
-#filename=$1.go
-filename=*.go
+filename="$1.go"
 shift
-GOCACHE=$PWD go run $filename "$@"
+
+# LeetCode-like convenience: allow gods imports without user-provided go.mod.
+if [ ! -f go.mod ]; then
+cat > go.mod <<'EOF'
+module code
+
+go 1.23
+
+require (
+    github.com/emirpasic/gods v1.18.1
+    github.com/emirpasic/gods/v2 v2.0.0-alpha
+)
+EOF
+fi
+
+GOCACHE=$PWD GOPROXY=off GOSUMDB=off go run "$filename" "$@"

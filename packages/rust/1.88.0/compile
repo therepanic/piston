@@ -50,7 +50,11 @@ if [ -f "${PISTON_RUST_LOCK:-}" ]; then
   cp "${PISTON_RUST_LOCK}" .piston-rust/Cargo.lock
 fi
 
-(cd .piston-rust && cargo build --release --offline)
+if [ -n "${PISTON_RUST_TARGET:-}" ]; then
+  export CARGO_TARGET_DIR="${PISTON_RUST_TARGET}"
+fi
+
+(cd .piston-rust && cargo build --release --offline -j 1)
 cp .piston-rust/target/release/code ./binary
 chmod +x ./binary
 

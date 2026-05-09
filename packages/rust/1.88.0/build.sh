@@ -55,5 +55,20 @@ replace-with = "vendored-sources"
 [source.vendored-sources]
 directory = "$PISTON_RUST_VENDOR"
 EOF
+
+# Precompile dependency graph once, so runtime compilation is fast enough.
+rm -rf "$PISTON_RUST_TARGET"
+mkdir -p "$PISTON_RUST_TARGET"
+cat > "$precache_dir/.cargo-config.toml" <<EOF
+[net]
+offline = true
+
+[source.crates-io]
+replace-with = "vendored-sources"
+
+[source.vendored-sources]
+directory = "$PISTON_RUST_VENDOR"
+EOF
+(cd "$precache_dir" && mkdir -p .cargo && cp .cargo-config.toml .cargo/config.toml && CARGO_TARGET_DIR="$PISTON_RUST_TARGET" cargo build --release --offline -j 1)
 rm -rf "$precache_dir"
 

@@ -6,6 +6,7 @@ export PATH=$RUST_INSTALL_LOC/bin:$PATH
 # Keep cargo registry/checkouts inside the package, so they can be prewarmed.
 export CARGO_HOME=$PWD/.cargo
 export RUSTUP_HOME=$PWD/.rustup
+export PISTON_RUST_TARGET=$PWD/target-cache
 
 # Vendored dependencies for offline builds
 export PISTON_RUST_VENDOR=$PWD/vendor
