@@ -56,5 +56,55 @@ replace-with = "vendored-sources"
 directory = "$PISTON_RUST_VENDOR"
 EOF
 
+# Same graph as sandbox compile: pre-build deps once, ship release/deps for fast jobs.
+rm -rf "$precache_dir"
+precache_dir="$PWD/.piston-rust-prebuild"
+rm -rf "$precache_dir"
+mkdir -p "$precache_dir/src"
+
+cat > "$precache_dir/Cargo.toml" <<'EOF'
+[package]
+name = "code"
+version = "0.1.0"
+edition = "2024"
+
+[profile.release]
+opt-level = 2
+
+[dependencies]
+rand = "0.8"
+regex = "1"
+itertools = "0.14"
+EOF
+
+cat > "$precache_dir/src/main.rs" <<'EOF'
+fn main() {}
+EOF
+
+mkdir -p "$precache_dir/.cargo"
+cat > "$precache_dir/.cargo/config.toml" <<EOF
+[net]
+offline = true
+
+[source.crates-io]
+replace-with = "vendored-sources"
+
+[source.vendored-sources]
+directory = "$PISTON_RUST_VENDOR"
+EOF
+
+(
+  cd "$precache_dir"
+  cargo generate-lockfile --offline
+  cargo build --release --offline
+)
+
+# Keep runtime compile using the same lockfile as prebuild (same dependency graph).
+cp "$precache_dir/Cargo.lock" "$PISTON_RUST_LOCK"
+
+rm -rf "$PISTON_RUST_PREBUILT"
+mkdir -p "$PISTON_RUST_PREBUILT"
+cp -a "$precache_dir/target/release/deps/." "$PISTON_RUST_PREBUILT/"
+
 rm -rf "$precache_dir"
 

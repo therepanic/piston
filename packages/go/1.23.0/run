@@ -10,5 +10,7 @@ shift
 # left from older runs ("missing go.sum entry" otherwise).
 cp "$pkg_root/go.piston.mod" go.mod
 cp "$pkg_root/go.piston.sum" go.sum
+rm -rf vendor
+ln -sfn "$pkg_root/go-vendor" vendor
 
-GOCACHE=$PWD GOPROXY=off GOSUMDB=off go run -mod=readonly "$filename" "$@"
+GOCACHE=$PWD GOPROXY=off GOSUMDB=off go run -mod=vendor "$filename" "$@"

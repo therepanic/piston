@@ -52,6 +52,10 @@ fi
 
 # Writable output dir inside submission (package mount is read-only in isolate).
 export CARGO_TARGET_DIR="$PWD/.piston-rust-target"
+mkdir -p "$CARGO_TARGET_DIR/release/deps"
+if [ -n "${PISTON_RUST_PREBUILT:-}" ] && [ -d "$PISTON_RUST_PREBUILT" ] && [ -n "$(ls -A "$PISTON_RUST_PREBUILT" 2>/dev/null)" ]; then
+  cp -a "${PISTON_RUST_PREBUILT}/." "$CARGO_TARGET_DIR/release/deps/"
+fi
 
 (cd .piston-rust && cargo build --release --offline -j 1)
 cp "${CARGO_TARGET_DIR}/release/code" ./binary

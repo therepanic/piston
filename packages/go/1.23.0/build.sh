@@ -20,7 +20,7 @@ rm -rf "$precache_dir"
 mkdir -p "$precache_dir"
 
 cat > "$precache_dir/go.mod" <<'EOF'
-module piston-precache
+module code
 
 go 1.23
 
@@ -34,14 +34,15 @@ EOF
   cd "$precache_dir"
   go mod download
   go mod tidy
+  # Vendored tree: works with -mod=vendor in nsjail (no GOMODCACHE / no network).
+  go mod vendor
 )
 
-# Ship go.mod + go.sum for run-time (submission has no network; go needs checksums).
 cp "$precache_dir/go.mod" ./go.piston.mod
 cp "$precache_dir/go.sum" ./go.piston.sum
+rm -rf ./go-vendor
+cp -a "$precache_dir/vendor" ./go-vendor
 
 rm -rf "$precache_dir"
 
-# Remove download cache to prevent tar "file changed as we read it" errors.
-# Keep extracted modules in $GOMODCACHE (e.g. github.com/emirpasic/gods*).
 rm -rf "$GOMODCACHE/cache/download" "$GOMODCACHE/cache/vcs"
