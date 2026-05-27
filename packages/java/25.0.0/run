@@ -5,5 +5,10 @@ mv "$1" "$1.java"
 source_file="$1.java"
 shift
 
-java --enable-preview --source 25 "$source_file" "$@"
+classpath="."
+if [ -n "${PISTON_JAVA_LIB_DIR:-}" ] && [ -d "${PISTON_JAVA_LIB_DIR}" ]; then
+  classpath="${classpath}:${PISTON_JAVA_LIB_DIR}/*"
+fi
+
+java --enable-preview --class-path "$classpath" --source 25 "$source_file" "$@"
 
