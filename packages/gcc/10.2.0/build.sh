@@ -3,6 +3,7 @@
 # Put instructions to build your package in here
 [[ -d "bin" ]] && exit 0
 PREFIX=$(realpath $(dirname $0))
+: "${NLOHMANN_JSON_VERSION:=3.11.3}"
 
 mkdir -p build obj
 
@@ -22,5 +23,10 @@ cd ../obj
 make -j$(nproc)
 make install -j$(nproc)
 cd ../
+
+mkdir -p include/nlohmann
+curl -L "https://raw.githubusercontent.com/nlohmann/json/v${NLOHMANN_JSON_VERSION}/single_include/nlohmann/json.hpp" \
+  -o include/nlohmann/json.hpp
+
 rm -rf build obj
 
