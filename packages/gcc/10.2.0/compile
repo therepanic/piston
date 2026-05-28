@@ -4,31 +4,50 @@
 
 set -euo pipefail
 
+collect_sources() {
+    local ext="$1"
+    shift || true
+    local -a sources=()
+    local file
+
+    for file in "$@"; do
+        if [[ "$file" == *".${ext}" ]]; then
+            sources+=("$file")
+        fi
+    done
+
+    printf '%s\n' "${sources[@]}"
+}
+
 
 case "${PISTON_LANGUAGE}" in
     c)
         main_file="$1"
         mv "$main_file" "${main_file}.c"
         shift || true
-        gcc -std=c11 "${main_file}.c" "$@" -lm
+        mapfile -t extra_sources < <(collect_sources c "$@")
+        gcc -std=c11 "${main_file}.c" "${extra_sources[@]}" -lm
         ;;
     c++)
         main_file="$1"
         mv "$main_file" "${main_file}.cpp"
         shift || true
-        g++ -std=c++17 -I"${PISTON_GCC_INCLUDE_DIR}" "${main_file}.cpp" "$@"
+        mapfile -t extra_sources < <(collect_sources cpp "$@")
+        g++ -std=c++17 -I"${PISTON_GCC_INCLUDE_DIR}" "${main_file}.cpp" "${extra_sources[@]}"
         ;;
     d)
         main_file="$1"
         mv "$main_file" "${main_file}.d"
         shift || true
-        gdc "${main_file}.d" "$@"
+        mapfile -t extra_sources < <(collect_sources d "$@")
+        gdc "${main_file}.d" "${extra_sources[@]}"
         ;;
     fortran)
         main_file="$1"
         mv "$main_file" "${main_file}.f90"
         shift || true
-        gfortran "${main_file}.f90" "$@"
+        mapfile -t extra_sources < <(collect_sources f90 "$@")
+        gfortran "${main_file}.f90" "${extra_sources[@]}"
         ;;
     *)
         echo "How did you get here? (${PISTON_LANGUAGE})"
