@@ -2,23 +2,33 @@
 
 # Put instructions to compile source code, remove this file if the language does not require this stage
 
+set -euo pipefail
+
 
 case "${PISTON_LANGUAGE}" in
     c)
-        rename 's/$/\.c/' "$@" # Add .c extension
-        gcc -std=c11 *.c -lm
+        main_file="$1"
+        mv "$main_file" "${main_file}.c"
+        shift || true
+        gcc -std=c11 "${main_file}.c" "$@" -lm
         ;;
     c++)
-        rename 's/$/\.cpp/' "$@" # Add .cpp extension
-        g++ -std=c++17 -I"${PISTON_GCC_INCLUDE_DIR}" *.cpp
+        main_file="$1"
+        mv "$main_file" "${main_file}.cpp"
+        shift || true
+        g++ -std=c++17 -I"${PISTON_GCC_INCLUDE_DIR}" "${main_file}.cpp" "$@"
         ;;
     d)
-        rename 's/.code$/\.d/' "$@" # Add .d extension
-        gdc *.d
+        main_file="$1"
+        mv "$main_file" "${main_file}.d"
+        shift || true
+        gdc "${main_file}.d" "$@"
         ;;
     fortran)
-        rename 's/.code$/\.f90/' "$@" # Add .f90 extension
-        gfortran *.f90
+        main_file="$1"
+        mv "$main_file" "${main_file}.f90"
+        shift || true
+        gfortran "${main_file}.f90" "$@"
         ;;
     *)
         echo "How did you get here? (${PISTON_LANGUAGE})"
@@ -26,4 +36,6 @@ case "${PISTON_LANGUAGE}" in
         ;;
 esac
 
-chmod +x a.out
+if [ -f a.out ]; then
+    chmod +x a.out
+fi
