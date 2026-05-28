@@ -2,14 +2,18 @@
 set -euo pipefail
 
 PREFIX=$(realpath "$(dirname "$0")")
+: "${NEWTONSOFT_JSON_VERSION:=13.0.3}"
 
 mkdir -p build/mono build/mono-basic
 cd build
 
 curl "https://download.mono-project.com/sources/mono/mono-6.12.0.182.tar.xz" -o mono.tar.xz
 curl -L "https://github.com/mono/mono-basic/archive/refs/tags/4.7.tar.gz" -o mono-basic.tar.gz
+curl -L "https://www.nuget.org/api/v2/package/Newtonsoft.Json/${NEWTONSOFT_JSON_VERSION}" -o newtonsoft-json.nupkg
 tar xf mono.tar.xz --strip-components=1 -C mono
 tar xf mono-basic.tar.gz --strip-components=1 -C mono-basic
+mkdir -p newtonsoft-json
+unzip -q newtonsoft-json.nupkg -d newtonsoft-json
 
 # Compiling Mono
 cd mono
@@ -69,6 +73,9 @@ if ! command -v mono-csc >/dev/null 2>&1 \
     echo "Mono C# compiler was not installed into the package" >&2
     exit 1
 fi
+
+mkdir -p "$PREFIX/mono-lib"
+cp newtonsoft-json/lib/net45/Newtonsoft.Json.dll "$PREFIX/mono-lib/"
 
 # Remove redundant files
 cd ../../

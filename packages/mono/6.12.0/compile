@@ -68,10 +68,15 @@ case "${PISTON_LANGUAGE}" in
         fi
         shift || true
         mapfile -t extra_sources < <(collect_sources cs "$@")
+        JSON_DLL="$pkg/mono-lib/Newtonsoft.Json.dll"
+        if [ ! -f "$JSON_DLL" ]; then
+            echo "Missing bundled Newtonsoft.Json.dll at $JSON_DLL" >&2
+            exit 1
+        fi
         if CSC="$(find_shell_cmd mono-csc mcs csc)"; then
-            "$CSC" -out:out.exe "$main_file" "${extra_sources[@]}"
+            "$CSC" -out:out.exe -r:"$JSON_DLL" "$main_file" "${extra_sources[@]}"
         elif CSC_EXE="$(find_compiler_exe)"; then
-            mono "$CSC_EXE" -out:out.exe "$main_file" "${extra_sources[@]}"
+            mono "$CSC_EXE" -out:out.exe -r:"$JSON_DLL" "$main_file" "${extra_sources[@]}"
         else
             echo "No C# compiler found (tried: mono-csc, mcs, csc, lib/mono/4.5/{mcs,csc}.exe)" >&2
             exit 1

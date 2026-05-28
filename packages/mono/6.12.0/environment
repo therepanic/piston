@@ -1,1 +1,2 @@
 export PATH=$PWD/bin:$PATH
+export MONO_PATH=$PWD/mono-lib${MONO_PATH:+:$MONO_PATH}
