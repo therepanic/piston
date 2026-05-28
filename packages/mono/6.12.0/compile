@@ -16,6 +16,23 @@ rename_if_missing_extension() {
     done
 }
 
+collect_sources() {
+    local ext="$1"
+    shift || true
+    local -a sources=()
+    local file
+
+    for file in "$@"; do
+        if [[ "$file" == *".${ext}" ]]; then
+            sources+=("$file")
+        fi
+    done
+
+    if [ "${#sources[@]}" -gt 0 ]; then
+        printf '%s\n' "${sources[@]}"
+    fi
+}
+
 find_shell_cmd() {
     local cmd
     for cmd in "$@"; do
@@ -44,22 +61,34 @@ find_compiler_exe() {
 
 case "${PISTON_LANGUAGE}" in
     csharp)
-        rename_if_missing_extension cs "$@"
+        main_file="$1"
+        if [[ "$main_file" != *.cs ]]; then
+            mv "$main_file" "${main_file}.cs"
+            main_file="${main_file}.cs"
+        fi
+        shift || true
+        mapfile -t extra_sources < <(collect_sources cs "$@")
         if CSC="$(find_shell_cmd mono-csc mcs csc)"; then
-            "$CSC" -out:out.exe *.cs
+            "$CSC" -out:out.exe "$main_file" "${extra_sources[@]}"
         elif CSC_EXE="$(find_compiler_exe)"; then
-            mono "$CSC_EXE" -out:out.exe *.cs
+            mono "$CSC_EXE" -out:out.exe "$main_file" "${extra_sources[@]}"
         else
             echo "No C# compiler found (tried: mono-csc, mcs, csc, lib/mono/4.5/{mcs,csc}.exe)" >&2
             exit 1
         fi
         ;;
     basic)
-        rename_if_missing_extension vb "$@"
+        main_file="$1"
+        if [[ "$main_file" != *.vb ]]; then
+            mv "$main_file" "${main_file}.vb"
+            main_file="${main_file}.vb"
+        fi
+        shift || true
+        mapfile -t extra_sources < <(collect_sources vb "$@")
         if VBNC="$(find_shell_cmd vbnc)"; then
-            "$VBNC" -out:out.exe *.vb
+            "$VBNC" -out:out.exe "$main_file" "${extra_sources[@]}"
         elif [ -f "$pkg/lib/mono/4.5/vbnc.exe" ]; then
-            mono "$pkg/lib/mono/4.5/vbnc.exe" -out:out.exe *.vb
+            mono "$pkg/lib/mono/4.5/vbnc.exe" -out:out.exe "$main_file" "${extra_sources[@]}"
         else
             echo "No Visual Basic compiler found (tried: vbnc, lib/mono/4.5/vbnc.exe)" >&2
             exit 1
