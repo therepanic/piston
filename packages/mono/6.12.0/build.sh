@@ -75,7 +75,12 @@ if ! command -v mono-csc >/dev/null 2>&1 \
 fi
 
 mkdir -p "$PREFIX/mono-lib"
-cp newtonsoft-json/lib/net45/Newtonsoft.Json.dll "$PREFIX/mono-lib/"
+JSON_DLL="$(find newtonsoft-json/lib -path '*/Newtonsoft.Json.dll' | sort | head -n 1)"
+if [ -z "${JSON_DLL}" ]; then
+    echo "Newtonsoft.Json.dll was not found in the NuGet package" >&2
+    exit 1
+fi
+cp "$JSON_DLL" "$PREFIX/mono-lib/"
 
 # Remove redundant files
 cd ../../
