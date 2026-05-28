@@ -27,6 +27,43 @@ cd ../mono-basic
 make -j$(nproc) PLATFORM="linux"  # Avoids conflict with the $PLATFORM variable we have
 make install -j$(nproc) PLATFORM="linux"
 
+# Some Mono builds do not expose compiler launchers in bin/.
+# Add stable wrappers if the managed compiler exes exist.
+mkdir -p "$PREFIX/bin"
+
+if [ ! -x "$PREFIX/bin/mono-csc" ] && [ -f "$PREFIX/lib/mono/4.5/csc.exe" ]; then
+cat > "$PREFIX/bin/mono-csc" <<EOF
+#!/bin/sh
+exec "$PREFIX/bin/mono" "$PREFIX/lib/mono/4.5/csc.exe" "\$@"
+EOF
+chmod +x "$PREFIX/bin/mono-csc"
+fi
+
+if [ ! -x "$PREFIX/bin/mcs" ] && [ -f "$PREFIX/lib/mono/4.5/mcs.exe" ]; then
+cat > "$PREFIX/bin/mcs" <<EOF
+#!/bin/sh
+exec "$PREFIX/bin/mono" "$PREFIX/lib/mono/4.5/mcs.exe" "\$@"
+EOF
+chmod +x "$PREFIX/bin/mcs"
+fi
+
+if [ ! -x "$PREFIX/bin/vbnc" ] && [ -f "$PREFIX/lib/mono/4.5/vbnc.exe" ]; then
+cat > "$PREFIX/bin/vbnc" <<EOF
+#!/bin/sh
+exec "$PREFIX/bin/mono" "$PREFIX/lib/mono/4.5/vbnc.exe" "\$@"
+EOF
+chmod +x "$PREFIX/bin/vbnc"
+fi
+
+# Fail the package build if no usable compiler was installed.
+if ! command -v mono-csc >/dev/null 2>&1 \
+  && ! command -v mcs >/dev/null 2>&1 \
+  && [ ! -f "$PREFIX/lib/mono/4.5/csc.exe" ] \
+  && [ ! -f "$PREFIX/lib/mono/4.5/mcs.exe" ]; then
+    echo "Mono C# compiler was not installed into the package" >&2
+    exit 1
+fi
+
 # Remove redundant files
 cd ../../
 rm -rf build
