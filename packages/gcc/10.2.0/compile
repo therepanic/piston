@@ -16,7 +16,9 @@ collect_sources() {
         fi
     done
 
-    printf '%s\n' "${sources[@]}"
+    if [ "${#sources[@]}" -gt 0 ]; then
+        printf '%s\n' "${sources[@]}"
+    fi
 }
 
 
