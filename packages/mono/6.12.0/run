@@ -1,4 +1,4 @@
 #!/bin/bash
 
 shift
-mono out "$@"
+mono out.exe "$@"
