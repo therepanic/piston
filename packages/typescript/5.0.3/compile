@@ -2,7 +2,12 @@
 
 pkg="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-rename 's/$/\.ts/' "$@" # Add .ts extension
+set -euo pipefail
+
+main_file="$1"
+if [[ "$main_file" != *.ts ]]; then
+  mv "$main_file" "${main_file}.ts"
+fi
 
 ln -sfn "$pkg/lib/node_modules" ./node_modules
 

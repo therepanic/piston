@@ -3,7 +3,12 @@
 # cwd is /box/submission; package files live next to this script (bind-mounted).
 pkg="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-rename 's/$/\.ts/' "$@" # Add .ts extension
+set -euo pipefail
+
+main_file="$1"
+if [[ "$main_file" != *.ts ]]; then
+  mv "$main_file" "${main_file}.ts"
+fi
 
 # Make deps visible: symlink into submission dir.
 ln -sfn "$pkg/lib/node_modules" ./node_modules

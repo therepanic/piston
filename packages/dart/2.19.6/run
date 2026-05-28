@@ -11,9 +11,16 @@ shift || true
 
 workdir=".piston-dart"
 rm -rf "$workdir"
-mkdir -p "$workdir/bin"
+mkdir -p "$workdir"
 
-cp "$code_file" "$workdir/bin/main.dart"
+shopt -s dotglob nullglob
+for file in *; do
+  if [ "$file" = "$workdir" ]; then
+    continue
+  fi
+  cp -R "$file" "$workdir/"
+done
+shopt -u dotglob nullglob
 
 cat > "$workdir/pubspec.yaml" <<'EOF'
 name: piston_runtime
@@ -26,5 +33,5 @@ EOF
 (
   cd "$workdir"
   dart pub get --offline
-  dart run bin/main.dart "$@"
+  dart run "$(basename "$code_file")" "$@"
 )

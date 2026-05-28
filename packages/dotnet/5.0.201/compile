@@ -5,23 +5,40 @@
 export DOTNET_CLI_HOME=$PWD
 export HOME=$PWD
 
+set -euo pipefail
+
+rename_if_missing_extension() {
+    local ext="$1"
+    shift || true
+    local file
+
+    for file in "$@"; do
+        if [[ "$file" != *.* ]]; then
+            mv "$file" "${file}.${ext}"
+        fi
+    done
+}
+
 dotnet build --help > /dev/null # Shut the thing up
 
 case "${PISTON_LANGUAGE}" in
     basic.net)
-        rename 's/$/\.vb/' "$@" # Add .vb extension
+        rename_if_missing_extension vb "$@"
         dotnet new console -lang VB -o . --no-restore
         rm Program.vb
         ;;
     fsharp.net)
         first_file=$1
         shift
-        rename 's/$/\.fs/' "$@" # Add .fs extension
+        rename_if_missing_extension fs "$first_file" "$@"
         dotnet new console -lang F# -o . --no-restore
-        mv $first_file Program.fs  # For some reason F#.net doesn't work unless the file name is Program.fs
+        if [[ "$first_file" != *.fs ]]; then
+            first_file="${first_file}.fs"
+        fi
+        mv "$first_file" Program.fs  # For some reason F#.net doesn't work unless the file name is Program.fs
         ;;
     csharp.net)
-        rename 's/$/\.cs/' "$@" # Add .cs extension
+        rename_if_missing_extension cs "$@"
         dotnet new console -o . --no-restore
         rm Program.cs
         ;;

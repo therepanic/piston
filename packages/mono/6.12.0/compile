@@ -1,12 +1,26 @@
 #!/bin/bash
 
+set -euo pipefail
+
+rename_if_missing_extension() {
+    local ext="$1"
+    shift || true
+    local file
+
+    for file in "$@"; do
+        if [[ "$file" != *.* ]]; then
+            mv "$file" "${file}.${ext}"
+        fi
+    done
+}
+
 case "${PISTON_LANGUAGE}" in
     csharp)
-        rename 's/$/\.cs/' "$@" # Add .cs extension
+        rename_if_missing_extension cs "$@"
         csc -out:out *.cs
         ;;
     basic)
-        rename 's/$/\.vb/' "$@" # Add .vb extension
+        rename_if_missing_extension vb "$@"
         vbnc -out:out *.vb
         ;;
     *)
