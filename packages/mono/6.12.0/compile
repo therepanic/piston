@@ -2,6 +2,8 @@
 
 set -euo pipefail
 
+pkg="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 rename_if_missing_extension() {
     local ext="$1"
     shift || true
@@ -14,7 +16,7 @@ rename_if_missing_extension() {
     done
 }
 
-find_cmd() {
+find_shell_cmd() {
     local cmd
     for cmd in "$@"; do
         if command -v "$cmd" >/dev/null 2>&1; then
@@ -25,22 +27,43 @@ find_cmd() {
     return 1
 }
 
+find_compiler_exe() {
+    local exe
+    for exe in \
+        "$pkg/lib/mono/4.5/mcs.exe" \
+        "$pkg/lib/mono/4.5/csc.exe" \
+        "$pkg/lib/mono/4.5/basic.exe"
+    do
+        if [ -f "$exe" ]; then
+            printf '%s\n' "$exe"
+            return 0
+        fi
+    done
+    return 1
+}
+
 case "${PISTON_LANGUAGE}" in
     csharp)
         rename_if_missing_extension cs "$@"
-        CSC="$(find_cmd mono-csc mcs csc)" || {
-            echo "No C# compiler found (tried: mono-csc, mcs, csc)" >&2
+        if CSC="$(find_shell_cmd mono-csc mcs csc)"; then
+            "$CSC" -out:out.exe *.cs
+        elif CSC_EXE="$(find_compiler_exe)"; then
+            mono "$CSC_EXE" -out:out.exe *.cs
+        else
+            echo "No C# compiler found (tried: mono-csc, mcs, csc, lib/mono/4.5/{mcs,csc}.exe)" >&2
             exit 1
-        }
-        "$CSC" -out:out.exe *.cs
+        fi
         ;;
     basic)
         rename_if_missing_extension vb "$@"
-        VBNC="$(find_cmd vbnc)" || {
-            echo "No Visual Basic compiler found (tried: vbnc)" >&2
+        if VBNC="$(find_shell_cmd vbnc)"; then
+            "$VBNC" -out:out.exe *.vb
+        elif [ -f "$pkg/lib/mono/4.5/vbnc.exe" ]; then
+            mono "$pkg/lib/mono/4.5/vbnc.exe" -out:out.exe *.vb
+        else
+            echo "No Visual Basic compiler found (tried: vbnc, lib/mono/4.5/vbnc.exe)" >&2
             exit 1
-        }
-        "$VBNC" -out:out.exe *.vb
+        fi
         ;;
     *)
         echo "How did you get here? (${PISTON_LANGUAGE})"
