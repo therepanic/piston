@@ -14,14 +14,33 @@ rename_if_missing_extension() {
     done
 }
 
+find_cmd() {
+    local cmd
+    for cmd in "$@"; do
+        if command -v "$cmd" >/dev/null 2>&1; then
+            printf '%s\n' "$cmd"
+            return 0
+        fi
+    done
+    return 1
+}
+
 case "${PISTON_LANGUAGE}" in
     csharp)
         rename_if_missing_extension cs "$@"
-        mcs -out:out.exe *.cs
+        CSC="$(find_cmd mono-csc mcs csc)" || {
+            echo "No C# compiler found (tried: mono-csc, mcs, csc)" >&2
+            exit 1
+        }
+        "$CSC" -out:out.exe *.cs
         ;;
     basic)
         rename_if_missing_extension vb "$@"
-        vbnc -out:out.exe *.vb
+        VBNC="$(find_cmd vbnc)" || {
+            echo "No Visual Basic compiler found (tried: vbnc)" >&2
+            exit 1
+        }
+        "$VBNC" -out:out.exe *.vb
         ;;
     *)
         echo "How did you get here? (${PISTON_LANGUAGE})"
