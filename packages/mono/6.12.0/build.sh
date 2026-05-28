@@ -3,17 +3,19 @@ set -euo pipefail
 
 PREFIX=$(realpath "$(dirname "$0")")
 : "${NEWTONSOFT_JSON_VERSION:=13.0.3}"
+BUILD_ROOT="$PREFIX/build"
+NEWTONSOFT_DIR="$BUILD_ROOT/newtonsoft-json"
 
-mkdir -p build/mono build/mono-basic
-cd build
+mkdir -p "$BUILD_ROOT/mono" "$BUILD_ROOT/mono-basic"
+cd "$BUILD_ROOT"
 
 curl "https://download.mono-project.com/sources/mono/mono-6.12.0.182.tar.xz" -o mono.tar.xz
 curl -L "https://github.com/mono/mono-basic/archive/refs/tags/4.7.tar.gz" -o mono-basic.tar.gz
 curl -L "https://www.nuget.org/api/v2/package/Newtonsoft.Json/${NEWTONSOFT_JSON_VERSION}" -o newtonsoft-json.nupkg
 tar xf mono.tar.xz --strip-components=1 -C mono
 tar xf mono-basic.tar.gz --strip-components=1 -C mono-basic
-mkdir -p newtonsoft-json
-unzip -q newtonsoft-json.nupkg -d newtonsoft-json
+mkdir -p "$NEWTONSOFT_DIR"
+unzip -q newtonsoft-json.nupkg -d "$NEWTONSOFT_DIR"
 
 # Compiling Mono
 cd mono
@@ -75,7 +77,7 @@ if ! command -v mono-csc >/dev/null 2>&1 \
 fi
 
 mkdir -p "$PREFIX/mono-lib"
-JSON_DLL="$(find newtonsoft-json/lib -path '*/Newtonsoft.Json.dll' | sort | head -n 1)"
+JSON_DLL="$(find "$NEWTONSOFT_DIR/lib" -path '*/Newtonsoft.Json.dll' | sort | head -n 1)"
 if [ -z "${JSON_DLL}" ]; then
     echo "Newtonsoft.Json.dll was not found in the NuGet package" >&2
     exit 1
@@ -83,5 +85,5 @@ fi
 cp "$JSON_DLL" "$PREFIX/mono-lib/"
 
 # Remove redundant files
-cd ../../
-rm -rf build
+cd "$PREFIX"
+rm -rf "$BUILD_ROOT"
