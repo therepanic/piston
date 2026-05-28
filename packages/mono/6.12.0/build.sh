@@ -1,6 +1,7 @@
 #!/bin/bash
+set -euo pipefail
 
-PREFIX=$(realpath $(dirname $0))
+PREFIX=$(realpath "$(dirname "$0")")
 
 mkdir -p build/mono build/mono-basic
 cd build
@@ -15,17 +16,22 @@ cd mono
 
 ./configure --prefix "$PREFIX"
 
-make -j$(nproc)
-make install -j$(nproc)
+make -j"$(nproc)"
+make install -j"$(nproc)"
 
 export PATH="$PREFIX/bin:$PATH"  # To be able to use mono commands
+
+if ! command -v mono >/dev/null 2>&1; then
+    echo "Mono runtime was not installed into the package" >&2
+    exit 1
+fi
 
 # Compiling mono-basic
 cd ../mono-basic
 ./configure --prefix="$PREFIX"
 
-make -j$(nproc) PLATFORM="linux"  # Avoids conflict with the $PLATFORM variable we have
-make install -j$(nproc) PLATFORM="linux"
+make -j"$(nproc)" PLATFORM="linux"  # Avoids conflict with the $PLATFORM variable we have
+make install -j"$(nproc)" PLATFORM="linux"
 
 # Some Mono builds do not expose compiler launchers in bin/.
 # Add stable wrappers if the managed compiler exes exist.

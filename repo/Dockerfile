@@ -8,6 +8,7 @@ RUN sed -i 's|deb.debian.org/debian|archive.debian.org/debian|g' /etc/apt/source
  && apt-get update && apt-get install -y --no-install-recommends \
     bash ca-certificates curl git jq unzip xz-utils gnupg pkg-config \
     build-essential autoconf cmake g++ gawk bison flex \
+    python3 \
     zlib1g-dev libbz2-dev liblzma-dev libffi-dev \
     libssl-dev libreadline-dev libyaml-dev libsqlite3-dev \
     libxml2-dev libcurl4-openssl-dev \
