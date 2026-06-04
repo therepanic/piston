@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Swift 5.9.2 is the latest 5.9 patch release and still targets Ubuntu 18.04.
-: "${SWIFT_TARBALL_URL:=https://download.swift.org/swift-5.9.2-release/ubuntu18.04/swift-5.9.2-RELEASE/swift-5.9.2-RELEASE-ubuntu18.04.tar.gz}"
+# Swift release archives use `ubuntu1804` in the directory name and `ubuntu18.04` in the file name.
+: "${SWIFT_TARBALL_URL:=https://download.swift.org/swift-5.9.2-release/ubuntu1804/swift-5.9.2-RELEASE/swift-5.9.2-RELEASE-ubuntu18.04.tar.gz}"
 
 curl -L "$SWIFT_TARBALL_URL" -o swift.tar.gz
 tar xzf swift.tar.gz --strip-components=1
