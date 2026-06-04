@@ -28,9 +28,17 @@ if [ -z "$release_dir" ] || [ ! -d "$release_dir" ]; then
     exit 1
 fi
 
+include_flags=(
+    -I "$release_dir/Modules"
+    -I "$release_dir"
+)
+
+while IFS= read -r dir; do
+    include_flags+=( -I "$dir" )
+done < <(find "$build_root" -type f -name module.modulemap -printf '%h\n' | sort -u)
+
 swiftc "$main_file" \
-    -I "$release_dir/Modules" \
-    -I "$release_dir" \
+    "${include_flags[@]}" \
     -L "$release_dir" \
     -Xlinker -rpath -Xlinker "$release_dir" \
     -lAlgorithms \
