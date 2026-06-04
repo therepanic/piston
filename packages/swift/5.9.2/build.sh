@@ -13,42 +13,11 @@ export HOME="$PWD/home"
 export XDG_CACHE_HOME="$HOME/.cache"
 mkdir -p "$HOME" "$XDG_CACHE_HOME"
 
-# Pre-warm SwiftPM dependencies used in OpenLeetCode-style solutions.
-precache_dir="$PWD/.piston-precache"
-rm -rf "$precache_dir"
-mkdir -p "$precache_dir/Sources/code"
+# Vendor SwiftPM dependencies into the package so runtime builds work without network access.
+deps_dir="$PWD/vendor"
+rm -rf "$deps_dir"
+mkdir -p "$deps_dir"
 
-cat > "$precache_dir/Package.swift" <<'EOF'
-// swift-tools-version: 5.9
-import PackageDescription
-
-let package = Package(
-    name: "code",
-    dependencies: [
-        .package(url: "https://github.com/apple/swift-algorithms.git", exact: "1.2.0"),
-        .package(url: "https://github.com/apple/swift-collections.git", exact: "1.1.4"),
-        .package(url: "https://github.com/apple/swift-numerics.git", exact: "1.0.2"),
-    ],
-    targets: [
-        .executableTarget(
-            name: "code",
-            dependencies: [
-                .product(name: "Algorithms", package: "swift-algorithms"),
-                .product(name: "Collections", package: "swift-collections"),
-                .product(name: "Numerics", package: "swift-numerics"),
-            ]
-        ),
-    ]
-)
-EOF
-
-cat > "$precache_dir/Sources/code/main.swift" <<'EOF'
-import Algorithms
-import Collections
-import Numerics
-
-print("ok")
-EOF
-
-(cd "$precache_dir" && swift package resolve)
-rm -rf "$precache_dir"
+git clone --depth 1 --branch 1.2.0 https://github.com/apple/swift-algorithms.git "$deps_dir/swift-algorithms"
+git clone --depth 1 --branch 1.1.4 https://github.com/apple/swift-collections.git "$deps_dir/swift-collections"
+git clone --depth 1 --branch 1.0.2 https://github.com/apple/swift-numerics.git "$deps_dir/swift-numerics"

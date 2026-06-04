@@ -8,11 +8,7 @@ export HOME="$PWD/.swift-home"
 export XDG_CACHE_HOME="$HOME/.cache"
 export CLANG_MODULE_CACHE_PATH="$XDG_CACHE_HOME/clang/ModuleCache"
 mkdir -p "$HOME/.swiftpm/configuration" "$HOME/.swiftpm/security" "$CLANG_MODULE_CACHE_PATH"
-
-# Seed writable caches from the prewarmed package cache because network is disabled at runtime.
-if [ -d "$pkgdir/home" ]; then
-    cp -a "$pkgdir/home/." "$HOME/"
-fi
+vendor_dir="$pkgdir/vendor"
 
 mv "$1" "$1.swift"
 main_file="$1.swift"
@@ -20,16 +16,16 @@ shift || true
 
 cp "$main_file" .piston-swift/Sources/code/main.swift
 
-cat > .piston-swift/Package.swift <<'EOF'
+cat > .piston-swift/Package.swift <<EOF
 // swift-tools-version: 5.9
 import PackageDescription
 
 let package = Package(
     name: "code",
     dependencies: [
-        .package(url: "https://github.com/apple/swift-algorithms.git", exact: "1.2.0"),
-        .package(url: "https://github.com/apple/swift-collections.git", exact: "1.1.4"),
-        .package(url: "https://github.com/apple/swift-numerics.git", exact: "1.0.2"),
+        .package(path: "${vendor_dir}/swift-algorithms"),
+        .package(path: "${vendor_dir}/swift-collections"),
+        .package(path: "${vendor_dir}/swift-numerics"),
     ],
     targets: [
         .executableTarget(
