@@ -12,7 +12,7 @@ RUN sed -i 's|deb.debian.org/debian|archive.debian.org/debian|g' /etc/apt/source
     zlib1g-dev libbz2-dev liblzma-dev libffi-dev \
     libssl-dev libreadline-dev libyaml-dev libsqlite3-dev \
     libxml2-dev libcurl4-openssl-dev \
-    libncurses5-dev libncursesw5-dev \
+    libncurses5-dev libncursesw5-dev libtinfo5 \
  && rm -rf /var/lib/apt/lists/* \
  && ln -sf /bin/bash /bin/sh
 
