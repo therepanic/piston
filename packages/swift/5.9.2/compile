@@ -12,23 +12,30 @@ if ! grep -Eq '^[[:space:]]*import[[:space:]]+(Algorithms|Collections|Numerics)\
     exit 0
 fi
 
-# Fall back to a prebuilt SwiftPM template only when package-based imports are required.
 template_dir="$pkgdir/template-swiftpm"
-if [ ! -d "$template_dir/.build" ]; then
-    echo "missing prebuilt SwiftPM template: $template_dir/.build" >&2
+build_root="$template_dir/.build"
+triple_dir="$(find "$build_root" -mindepth 1 -maxdepth 1 -type d | head -n 1)"
+release_dir=""
+
+if [ -n "$triple_dir" ] && [ -d "$triple_dir/release" ]; then
+    release_dir="$triple_dir/release"
+elif [ -d "$build_root/release" ]; then
+    release_dir="$build_root/release"
+fi
+
+if [ -z "$release_dir" ] || [ ! -d "$release_dir" ]; then
+    echo "missing prebuilt Swift release artifacts under $build_root" >&2
     exit 1
 fi
 
-rm -rf .piston-swift
-cp -a "$template_dir" .piston-swift
+swiftc "$main_file" \
+    -I "$release_dir/Modules" \
+    -I "$release_dir" \
+    -L "$release_dir" \
+    -Xlinker -rpath -Xlinker "$release_dir" \
+    -lAlgorithms \
+    -lCollections \
+    -lNumerics \
+    -o ./binary
 
-export HOME="$PWD/.swift-home"
-export XDG_CACHE_HOME="$HOME/.cache"
-export CLANG_MODULE_CACHE_PATH="$XDG_CACHE_HOME/clang/ModuleCache"
-mkdir -p "$HOME/.swiftpm/configuration" "$HOME/.swiftpm/security" "$CLANG_MODULE_CACHE_PATH"
-
-cp "$main_file" .piston-swift/Sources/code/main.swift
-
-(cd .piston-swift && swift build -c release)
-cp .piston-swift/.build/release/code ./binary
 chmod +x ./binary
