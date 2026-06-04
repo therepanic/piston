@@ -60,3 +60,7 @@ print("ok")
 EOF
 
 (cd "$template_dir" && swift build -c release)
+
+# Drop transient compiler caches and normalize permissions so the installed package is copyable in isolate.
+find "$template_dir/.build" -type d \( -name ModuleCache -o -name Modules \) -prune -exec rm -rf {} +
+chmod -R a+rX "$template_dir" "$deps_dir"
