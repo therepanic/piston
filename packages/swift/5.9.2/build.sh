@@ -9,7 +9,9 @@ tar xzf swift.tar.gz --strip-components=1
 rm swift.tar.gz
 
 source ./environment
-mkdir -p "$HOME"
+export HOME="$PWD/home"
+export XDG_CACHE_HOME="$HOME/.cache"
+mkdir -p "$HOME" "$XDG_CACHE_HOME"
 
 # Pre-warm SwiftPM dependencies used in OpenLeetCode-style solutions.
 precache_dir="$PWD/.piston-precache"
