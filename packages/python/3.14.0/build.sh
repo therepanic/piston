@@ -18,5 +18,5 @@ cd ..
 
 rm -rf build
 
-bin/python3.12 -m pip install numpy scipy pandas pycryptodome whoosh bcrypt passlib sympy xxhash base58 cryptography PyNaCl
-bin/python3.12 -m pip install sortedcontainers
+bin/python3.14 -m pip install numpy scipy pandas pycryptodome whoosh bcrypt passlib sympy xxhash base58 cryptography PyNaCl
+bin/python3.14 -m pip install sortedcontainers
