@@ -3,10 +3,16 @@ set -euo pipefail
 
 # Build via SwiftPM so package imports work without extra user setup.
 mkdir -p .piston-swift/Sources/code
+pkgdir="$(cd "$(dirname "$0")" && pwd)"
 export HOME="$PWD/.swift-home"
 export XDG_CACHE_HOME="$HOME/.cache"
 export CLANG_MODULE_CACHE_PATH="$XDG_CACHE_HOME/clang/ModuleCache"
 mkdir -p "$HOME/.swiftpm/configuration" "$HOME/.swiftpm/security" "$CLANG_MODULE_CACHE_PATH"
+
+# Seed writable caches from the prewarmed package cache because network is disabled at runtime.
+if [ -d "$pkgdir/home" ]; then
+    cp -a "$pkgdir/home/." "$HOME/"
+fi
 
 mv "$1" "$1.swift"
 main_file="$1.swift"
