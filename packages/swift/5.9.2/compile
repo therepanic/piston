@@ -1,44 +1,33 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Build via SwiftPM so package imports work without extra user setup.
-mkdir -p .piston-swift/Sources/code
 pkgdir="$(cd "$(dirname "$0")" && pwd)"
-export HOME="$PWD/.swift-home"
-export XDG_CACHE_HOME="$HOME/.cache"
-export CLANG_MODULE_CACHE_PATH="$XDG_CACHE_HOME/clang/ModuleCache"
-mkdir -p "$HOME/.swiftpm/configuration" "$HOME/.swiftpm/security" "$CLANG_MODULE_CACHE_PATH"
-vendor_dir="$pkgdir/vendor"
-
 mv "$1" "$1.swift"
 main_file="$1.swift"
 shift || true
 
+if ! grep -Eq '^[[:space:]]*import[[:space:]]+(Algorithms|Collections|Numerics)\b' "$main_file"; then
+    swiftc "$main_file" -o ./binary
+    chmod +x ./binary
+    exit 0
+fi
+
+# Fall back to a prebuilt SwiftPM template only when package-based imports are required.
+template_dir="$pkgdir/template-swiftpm"
+if [ ! -d "$template_dir/.build" ]; then
+    echo "missing prebuilt SwiftPM template: $template_dir/.build" >&2
+    exit 1
+fi
+
+rm -rf .piston-swift
+cp -a "$template_dir" .piston-swift
+
+export HOME="$PWD/.swift-home"
+export XDG_CACHE_HOME="$HOME/.cache"
+export CLANG_MODULE_CACHE_PATH="$XDG_CACHE_HOME/clang/ModuleCache"
+mkdir -p "$HOME/.swiftpm/configuration" "$HOME/.swiftpm/security" "$CLANG_MODULE_CACHE_PATH"
+
 cp "$main_file" .piston-swift/Sources/code/main.swift
-
-cat > .piston-swift/Package.swift <<EOF
-// swift-tools-version: 5.9
-import PackageDescription
-
-let package = Package(
-    name: "code",
-    dependencies: [
-        .package(path: "${vendor_dir}/swift-algorithms"),
-        .package(path: "${vendor_dir}/swift-collections"),
-        .package(path: "${vendor_dir}/swift-numerics"),
-    ],
-    targets: [
-        .executableTarget(
-            name: "code",
-            dependencies: [
-                .product(name: "Algorithms", package: "swift-algorithms"),
-                .product(name: "Collections", package: "swift-collections"),
-                .product(name: "Numerics", package: "swift-numerics"),
-            ]
-        ),
-    ]
-)
-EOF
 
 (cd .piston-swift && swift build -c release)
 cp .piston-swift/.build/release/code ./binary

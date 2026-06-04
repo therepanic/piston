@@ -1,5 +1,10 @@
 {
     "language": "swift",
     "version": "5.9.2",
-    "aliases": ["swift"]
+    "aliases": ["swift"],
+    "limit_overrides": {
+        "max_process_count": 128,
+        "compile_timeout": 30000,
+        "compile_cpu_time": 30000
+    }
 }

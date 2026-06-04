@@ -21,3 +21,42 @@ mkdir -p "$deps_dir"
 git clone --depth 1 --branch 1.2.0 https://github.com/apple/swift-algorithms.git "$deps_dir/swift-algorithms"
 git clone --depth 1 --branch 1.1.4 https://github.com/apple/swift-collections.git "$deps_dir/swift-collections"
 git clone --depth 1 --branch 1.0.2 https://github.com/apple/swift-numerics.git "$deps_dir/swift-numerics"
+
+# Prebuild a reusable SwiftPM workspace so runtime compiles only rebuild user code.
+template_dir="$PWD/template-swiftpm"
+rm -rf "$template_dir"
+mkdir -p "$template_dir/Sources/code"
+
+cat > "$template_dir/Package.swift" <<EOF
+// swift-tools-version: 5.9
+import PackageDescription
+
+let package = Package(
+    name: "code",
+    dependencies: [
+        .package(path: "${deps_dir}/swift-algorithms"),
+        .package(path: "${deps_dir}/swift-collections"),
+        .package(path: "${deps_dir}/swift-numerics"),
+    ],
+    targets: [
+        .executableTarget(
+            name: "code",
+            dependencies: [
+                .product(name: "Algorithms", package: "swift-algorithms"),
+                .product(name: "Collections", package: "swift-collections"),
+                .product(name: "Numerics", package: "swift-numerics"),
+            ]
+        ),
+    ]
+)
+EOF
+
+cat > "$template_dir/Sources/code/main.swift" <<'EOF'
+import Algorithms
+import Collections
+import Numerics
+
+print("ok")
+EOF
+
+(cd "$template_dir" && swift build -c release)
