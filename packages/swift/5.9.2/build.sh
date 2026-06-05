@@ -41,6 +41,7 @@ let package = Package(
     dependencies: [
         .package(path: "${deps_dir}/swift-algorithms"),
         .package(path: "${deps_dir}/swift-collections"),
+        .package(path: "${deps_dir}/swift-numerics"),
     ],
     targets: [
         .executableTarget(
@@ -48,6 +49,7 @@ let package = Package(
             dependencies: [
                 .product(name: "Algorithms", package: "swift-algorithms"),
                 .product(name: "Collections", package: "swift-collections"),
+                .product(name: "Numerics", package: "swift-numerics"),
             ],
             linkerSettings: [
                 .linkedLibrary("m"),
@@ -60,6 +62,7 @@ EOF
 cat > "$template_dir/Sources/code/main.swift" <<'EOF'
 import Algorithms
 import Collections
+import Numerics
 
 print("ok")
 EOF
