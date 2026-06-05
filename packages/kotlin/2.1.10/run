@@ -4,7 +4,7 @@ shift
 pkgdir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 main_class="$(cat .piston_main_class 2>/dev/null || echo MainKt)"
 
-classpath="out"
+classpath=".piston-kotlin/out"
 
 if [ -n "${PISTON_KOTLIN_LIB_DIR:-}" ] && [ -d "${PISTON_KOTLIN_LIB_DIR}" ]; then
   classpath="${classpath}:${PISTON_KOTLIN_LIB_DIR}/*"
