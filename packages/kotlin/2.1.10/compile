@@ -31,14 +31,14 @@ if [ -d "$lib_dir" ]; then
   merge_dir="$(mktemp -d)"
   for jar in "$lib_dir"/*.jar; do
     [ -e "$jar" ] || continue
-    unzip -qo "$jar" -d "$merge_dir"
+    (
+      cd "$merge_dir"
+      jar xf "$jar"
+    )
   done
   rm -rf "$merge_dir/META-INF"
   if find "$merge_dir" -mindepth 1 -print -quit | grep -q .; then
-    (
-      cd "$merge_dir"
-      zip -qr "$OLDPWD/code.jar" .
-    )
+    jar uf code.jar -C "$merge_dir" .
   fi
   rm -rf "$merge_dir"
 fi
