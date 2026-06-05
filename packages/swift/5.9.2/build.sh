@@ -48,7 +48,6 @@ let package = Package(
             dependencies: [
                 .product(name: "Algorithms", package: "swift-algorithms"),
                 .product(name: "Collections", package: "swift-collections"),
-                .product(name: "Numerics", package: "swift-numerics"),
             ]
         ),
     ]
@@ -58,7 +57,6 @@ EOF
 cat > "$template_dir/Sources/code/main.swift" <<'EOF'
 import Algorithms
 import Collections
-import Numerics
 
 print("ok")
 EOF
