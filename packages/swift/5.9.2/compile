@@ -45,10 +45,10 @@ done < <(find "$vendor_dir" -type f -name module.modulemap -printf '%h\n' | sort
 object_files=()
 while IFS= read -r file; do
     object_files+=( "$file" )
-done < <(find "$release_dir" -type f \( -name '*.o' -o -name '*.a' \) ! -path '*/code.build/*' | sort)
+done < <(find "$build_root" -type f \( -name '*.o' -o -name '*.a' \) ! -path '*/code.build/*' | sort)
 
 if [ "${#object_files[@]}" -eq 0 ]; then
-    echo "missing prebuilt Swift object files under $release_dir" >&2
+    echo "missing prebuilt Swift object files under $build_root" >&2
     exit 1
 fi
 
