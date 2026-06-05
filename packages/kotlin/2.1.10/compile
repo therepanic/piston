@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-rename 's/$/\.kt/' "$@" # Add .kt extension
+main_file="$1"
+if [[ "$main_file" != *.kt ]]; then
+  mv "$main_file" "${main_file}.kt"
+fi
 
 classpath=""
 lib_dir="${PISTON_KOTLIN_LIB_DIR:-}"
