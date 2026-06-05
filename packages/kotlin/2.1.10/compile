@@ -4,9 +4,6 @@ set -euo pipefail
 pkgdir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 main_file="$1"
 main_name="$(basename "$main_file")"
-if [[ "$main_name" != *.kt ]]; then
-  main_name="${main_name}.kt"
-fi
 shift || true
 
 workdir=".piston-kotlin"
@@ -22,8 +19,18 @@ for file in *; do
 done
 shopt -u dotglob nullglob
 
-if [[ "$main_name" != "Main.kt" ]]; then
-  mv "$workdir/$main_name" "$workdir/Main.kt"
+source_name="$main_name"
+if [[ ! -e "$workdir/$source_name" && "$source_name" != *.kt && -e "$workdir/${source_name}.kt" ]]; then
+  source_name="${source_name}.kt"
+fi
+
+if [[ ! -e "$workdir/$source_name" ]]; then
+  echo "main Kotlin file not found in $workdir: $main_name" >&2
+  exit 1
+fi
+
+if [[ "$source_name" != "Main.kt" ]]; then
+  mv "$workdir/$source_name" "$workdir/Main.kt"
 fi
 
 echo "MainKt" > .piston_main_class
