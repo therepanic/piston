@@ -14,6 +14,7 @@ fi
 
 template_dir="$pkgdir/template-swiftpm"
 build_root="$template_dir/.build"
+vendor_dir="$pkgdir/vendor"
 triple_dir="$(find "$build_root" -mindepth 1 -maxdepth 1 -type d | head -n 1)"
 release_dir=""
 
@@ -36,6 +37,10 @@ include_flags=(
 while IFS= read -r dir; do
     include_flags+=( -I "$dir" )
 done < <(find "$build_root" -type f -name module.modulemap -printf '%h\n' | sort -u)
+
+while IFS= read -r dir; do
+    include_flags+=( -I "$dir" )
+done < <(find "$vendor_dir" -type f -name module.modulemap -printf '%h\n' | sort -u)
 
 swiftc "$main_file" \
     "${include_flags[@]}" \
