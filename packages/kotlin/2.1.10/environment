@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
 
 export PATH=$PWD/bin:$PATH
+export PISTON_KOTLIN_LIB_DIR=$PWD/libs
 

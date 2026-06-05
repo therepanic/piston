@@ -1,6 +1,40 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
 rename 's/$/\.kt/' "$@" # Add .kt extension
 
-kotlinc *.kt -include-runtime -d code.jar
+classpath=""
+if [ -d libs ]; then
+  for jar in libs/*.jar; do
+    [ -e "$jar" ] || continue
+    if [ -z "$classpath" ]; then
+      classpath="$jar"
+    else
+      classpath="${classpath}:$jar"
+    fi
+  done
+fi
+
+compile_args=( *.kt -include-runtime -d code.jar )
+if [ -n "$classpath" ]; then
+  compile_args=( -cp "$classpath" "${compile_args[@]}" )
+fi
+
+kotlinc "${compile_args[@]}"
+
+if [ -d libs ]; then
+  merge_dir="$(mktemp -d)"
+  for jar in libs/*.jar; do
+    [ -e "$jar" ] || continue
+    unzip -qo "$jar" -d "$merge_dir"
+  done
+  rm -rf "$merge_dir/META-INF"
+  if find "$merge_dir" -mindepth 1 -print -quit | grep -q .; then
+    (
+      cd "$merge_dir"
+      zip -qr "$OLDPWD/code.jar" .
+    )
+  fi
+  rm -rf "$merge_dir"
+fi
 

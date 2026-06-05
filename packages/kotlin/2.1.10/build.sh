@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+: "${GSON_VERSION:=2.13.1}"
+
 # Bundle a JDK (Kotlin 2.x requires a modern Java runtime).
 # Uses Adoptium API to avoid pinning exact build numbers.
 curl -L "https://api.adoptium.net/v3/binary/latest/21/ga/linux/x64/jdk/hotspot/normal/eclipse" -o jdk.tar.gz
@@ -13,3 +15,7 @@ unzip kotlin.zip >/dev/null
 rm kotlin.zip
 cp -r kotlinc/* .
 rm -rf kotlinc
+
+mkdir -p libs
+curl -L "https://repo1.maven.org/maven2/com/google/code/gson/gson/${GSON_VERSION}/gson-${GSON_VERSION}.jar" \
+  -o "libs/gson-${GSON_VERSION}.jar"
