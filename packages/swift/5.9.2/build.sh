@@ -22,6 +22,11 @@ git clone --depth 1 --branch 1.2.0 https://github.com/apple/swift-algorithms.git
 git clone --depth 1 --branch 1.1.4 https://github.com/apple/swift-collections.git "$deps_dir/swift-collections"
 git clone --depth 1 --branch 1.0.2 https://github.com/apple/swift-numerics.git "$deps_dir/swift-numerics"
 
+# Make swift-algorithms use the vendored numerics package so SwiftPM does not see
+# the same package identity both as a URL dependency and a local path dependency.
+sed -i 's#\.package(url: "https://github.com/apple/swift-numerics.git", from: "1\.0\.0")#.package(path: "'"$deps_dir"'/swift-numerics")#' \
+    "$deps_dir/swift-algorithms/Package.swift"
+
 # Prebuild a reusable SwiftPM workspace so runtime compiles only rebuild user code.
 template_dir="$PWD/template-swiftpm"
 rm -rf "$template_dir"
@@ -36,7 +41,6 @@ let package = Package(
     dependencies: [
         .package(path: "${deps_dir}/swift-algorithms"),
         .package(path: "${deps_dir}/swift-collections"),
-        .package(path: "${deps_dir}/swift-numerics"),
     ],
     targets: [
         .executableTarget(
