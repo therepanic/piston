@@ -48,6 +48,9 @@ let package = Package(
             dependencies: [
                 .product(name: "Algorithms", package: "swift-algorithms"),
                 .product(name: "Collections", package: "swift-collections"),
+            ],
+            linkerSettings: [
+                .linkedLibrary("m"),
             ]
         ),
     ]

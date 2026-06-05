@@ -44,6 +44,7 @@ swiftc "$main_file" \
     -lAlgorithms \
     -lCollections \
     -lNumerics \
+    -lm \
     -o ./binary
 
 chmod +x ./binary
