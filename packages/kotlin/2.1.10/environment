@@ -2,5 +2,4 @@
 
 export PATH=$PWD/bin:$PATH
 export PISTON_KOTLIN_LIB_DIR=$PWD/libs
-export JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS:+$JAVA_TOOL_OPTIONS }-XX:+UseSerialGC -XX:TieredStopAtLevel=1"
 

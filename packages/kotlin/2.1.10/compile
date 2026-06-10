@@ -45,5 +45,11 @@ if [ -n "$classpath" ]; then
   compile_args=( -cp "$classpath" "${compile_args[@]}" )
 fi
 
-kotlinc "${compile_args[@]}" *.kt
+kotlinc \
+  -J-XX:+UseSerialGC \
+  -J-XX:TieredStopAtLevel=1 \
+  -J-Xms32m \
+  -J-Xmx256m \
+  "${compile_args[@]}" \
+  *.kt
 
