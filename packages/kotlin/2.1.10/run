@@ -6,13 +6,24 @@ main_class="$(cat .piston_main_class 2>/dev/null || echo MainKt)"
 
 classpath=".piston-kotlin/out"
 
+append_classpath() {
+  local path="$1"
+  if [ -e "$path" ]; then
+    classpath="${classpath}:${path}"
+  fi
+}
+
+if [ -d "out" ]; then
+  classpath="out"
+fi
+
 if [ -n "${PISTON_KOTLIN_LIB_DIR:-}" ] && [ -d "${PISTON_KOTLIN_LIB_DIR}" ]; then
   classpath="${classpath}:${PISTON_KOTLIN_LIB_DIR}/*"
 fi
 
-if [ -d "${pkgdir}/lib" ]; then
-  classpath="${classpath}:${pkgdir}/lib/*"
-fi
+append_classpath "${pkgdir}/lib/kotlin-stdlib.jar"
+append_classpath "${pkgdir}/lib/kotlin-stdlib-jdk7.jar"
+append_classpath "${pkgdir}/lib/kotlin-stdlib-jdk8.jar"
 
 java -cp "$classpath" "$main_class" "$@"
 

@@ -29,8 +29,6 @@ if [ -z "$lib_dir" ] || [ ! -d "$lib_dir" ]; then
   lib_dir="libs"
 fi
 
-stdlib_dir="${pkgdir}/lib"
-
 if [ -d "$lib_dir" ]; then
   for jar in "$lib_dir"/*.jar; do
     [ -e "$jar" ] || continue
@@ -41,15 +39,6 @@ if [ -d "$lib_dir" ]; then
     fi
   done
 fi
-
-for jar in "$stdlib_dir"/*.jar; do
-  [ -e "$jar" ] || continue
-  if [ -z "$classpath" ]; then
-    classpath="$jar"
-  else
-    classpath="${classpath}:$jar"
-  fi
-done
 
 compile_args=( -Xbackend-threads=1 -d out )
 if [ -n "$classpath" ]; then
