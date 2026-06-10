@@ -3,34 +3,22 @@ set -euo pipefail
 
 pkgdir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 main_file="$1"
-main_name="$(basename "$main_file")"
 shift || true
 
-workdir=".piston-kotlin"
-rm -rf "$workdir"
-mkdir -p "$workdir"
-
-shopt -s dotglob nullglob
-for file in *; do
-  if [[ "$file" == "$workdir" ]]; then
-    continue
-  fi
-  cp -R "$file" "$workdir/"
-done
-shopt -u dotglob nullglob
-
-source_name="$main_name"
-if [[ ! -e "$workdir/$source_name" && "$source_name" != *.kt && -e "$workdir/${source_name}.kt" ]]; then
+source_name="$main_file"
+if [[ ! -e "$source_name" && "$source_name" != *.kt && -e "${source_name}.kt" ]]; then
   source_name="${source_name}.kt"
 fi
 
-if [[ ! -e "$workdir/$source_name" ]]; then
-  echo "main Kotlin file not found in $workdir: $main_name" >&2
+if [[ ! -e "$source_name" ]]; then
+  echo "main Kotlin file not found: $main_file" >&2
   exit 1
 fi
 
+rm -rf out
+
 if [[ "$source_name" != "Main.kt" ]]; then
-  mv "$workdir/$source_name" "$workdir/Main.kt"
+  mv "$source_name" Main.kt
 fi
 
 echo "MainKt" > .piston_main_class
@@ -68,8 +56,5 @@ if [ -n "$classpath" ]; then
   compile_args=( -cp "$classpath" "${compile_args[@]}" )
 fi
 
-(
-  cd "$workdir"
-  kotlinc "${compile_args[@]}" *.kt
-)
+kotlinc "${compile_args[@]}" *.kt
 
